@@ -40,9 +40,11 @@ dan rename menjadi
 lalu Isi pakasir project dan api key nya.
 
 **4. Konfigurasi Produk**
+
 Tulis daftar produk sesuai dengan yang ada di file products.json dan sesuaikan isi produk yang dijual di dalam folder stock
 
 **4. Jalankan Bot**
+
 Ubah nomor ponsel di file creator.json dan premium.json
 
 **5. Jalankan Bot**
