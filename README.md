@@ -4,7 +4,9 @@ Ini adalah program bot yang dibuat oleh [Lenwy]( https://github.com/Lenwyy). Kar
 
 ## 🌟 **Fitur Utama**
 **1. Penjualan Produk Digital**
+
 **2. Pembayaran dengan QRIS**
+
 **3. Notifikasi Real Time**
 
 
