@@ -1,0 +1,10 @@
+[
+    {
+        "id": "01",
+        "name": "Produk A",
+        "price": 1000,
+        "desc": "Deskripsi produk A",
+        "file": "contohproduk.js",
+        "type": "regular"
+    }
+]
