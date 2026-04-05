@@ -43,7 +43,7 @@ lalu Isi pakasir project dan api key nya.
 
 Tulis daftar produk sesuai dengan yang ada di file products.json dan sesuaikan isi produk yang dijual di dalam folder stock
 
-**4. Jalankan Bot**
+**4. Sesuaikan nomor hp**
 
 Ubah nomor ponsel di file creator.json dan premium.json
 
