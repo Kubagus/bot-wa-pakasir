@@ -6,13 +6,5 @@
     "desc": "Deskripsi produk A",
     "file": "contohproduk.js",
     "type": "regular"
-  },
-  {
-    "id": "02",
-    "name": "Produk C",
-    "price": 1000,
-    "desc": "",
-    "file": "produkb.zip",
-    "type": "regular"
   }
 ]
