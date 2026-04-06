@@ -187,9 +187,9 @@ break
 
 case 'list':
 case 'listproduct': {
-  const productsPath = path.join(process.cwd(), 'whatsApp', 'database', 'stock', 'products.json');
+  const productsPath = path.join(process.cwd(), 'WhatsApp', 'database', 'stock', 'products.json');
   const products = JSON.parse(fs.readFileSync(productsPath, 'utf8') || '[]');
-  let msgText = 'Daftar Prroduk\n';
+  let msgText = 'Daftar Produk\n';
   for (const p of products) {
     msgText += `[${p.id}] ${p.name} - Rp ${p.price.toLocaleString()}\n`;
   }
@@ -211,6 +211,66 @@ break
 case "private": {
     if (!IsPriv) return lenwyreply(globalThis.mess.private)
     lenwyreply("🎁 *Kamu Sedang Berada Di Dalam Private Chat*")
+}
+break
+
+case "addproduk": {
+    if (!isLenwy && !isAdmin) return lenwyreply("⚠️ *Hanya Admin atau Owner yang bisa menambahkan produk!*")
+
+    if (!q) return lenwyreply("☘️ *Contoh:* .addproduk name:Produk B, price:2000, file:produkb.zip, desc:Deskripsi optional")
+
+    // Parse input
+    const params = q.split(',').map(p => p.trim())
+    let name, price, file, desc, type = "regular"
+
+    for (const param of params) {
+        const [key, ...valueParts] = param.split(':')
+        const value = valueParts.join(':').trim()
+        switch (key.toLowerCase()) {
+            case 'name':
+                name = value
+                break
+            case 'price':
+                price = parseInt(value)
+                if (isNaN(price)) return lenwyreply("⚠️ *Price harus berupa angka!*")
+                break
+            case 'file':
+                file = value
+                break
+            case 'desc':
+                desc = value
+                break
+            case 'type':
+                type = value || "regular"
+                break
+        }
+    }
+
+    if (!name || !price || !file) return lenwyreply("⚠️ *Name, price, dan file wajib diisi!*")
+
+    // Baca products.json
+    const productsPath = path.join(process.cwd(), 'WhatsApp', 'database', 'stock', 'products.json')
+    const products = JSON.parse(fs.readFileSync(productsPath, 'utf8') || '[]')
+
+    // Generate ID baru
+    const maxId = products.length > 0 ? Math.max(...products.map(p => parseInt(p.id))) : 0
+    const newId = (maxId + 1).toString().padStart(2, '0')
+
+    // Tambahkan produk baru
+    const newProduct = {
+        id: newId,
+        name,
+        price,
+        desc: desc || "",
+        file,
+        type
+    }
+    products.push(newProduct)
+
+    // Tulis kembali file
+    fs.writeFileSync(productsPath, JSON.stringify(products, null, 2))
+
+    lenwyreply(`✅ *Produk berhasil ditambahkan!*\n\nID: ${newId}\nNama: ${name}\nHarga: Rp ${price.toLocaleString()}\nFile: ${file}\nDeskripsi: ${desc || '-'}\nType: ${type}`)
 }
 break
 
