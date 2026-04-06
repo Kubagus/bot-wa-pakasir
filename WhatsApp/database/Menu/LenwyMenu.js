@@ -1,15 +1,15 @@
 // Menu =============================
 
-globalThis.lenwymenu = `☕ *Lenwy Rebuild*
-*WhatsApp Bot To Solve Your Problems*
+globalThis.lenwymenu = `☕ *Store*
+*WhatsApp Bot Store*
 
 📑 *Information Bot*
 *Creator : Lenwy*
 *Contact : wa.me/6283829814737*
 *Youtube Channel : Lenwy*
 
-[+] .Aimenu - Ai Menu
-[+] .Downmenu - Downloader Menu
+[+] .list - List Produk
+[+] .order - Order Produk
 
 ⚠ *Dalam Tahap Pengembangan*`,
 

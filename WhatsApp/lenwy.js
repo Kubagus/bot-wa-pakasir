@@ -30,6 +30,7 @@ import Ai4Chat from "./scrape/Ai4Chat.js"
 // Track Messages
 const processedMessages = new Set()
 const groupMetadataCache = new Map();
+const pendingDeletes = new Map();
 
 // Read Json File
 function readJSONSync(pathFile) {
@@ -88,6 +89,39 @@ export default async (lenwy, m, meta) => {
         }
     }
 
+    const lenwyreply = (teks) => lenwy.sendMessage(replyJid, { text: teks }, { quoted: len })
+
+    // Handle pending deletes before prefix check
+    if (pendingDeletes.has(sender)) {
+        const pending = pendingDeletes.get(sender)
+        
+        // Timeout 5 menit
+        if (Date.now() - pending.timestamp > 5 * 60 * 1000) {
+            pendingDeletes.delete(sender)
+            lenwyreply("⏰ *Timeout.* Penghapusan dibatalkan.")
+            return
+        }
+
+        const cleanBody = body.replace(/['"]/g, '').trim().toLowerCase()
+        if (cleanBody === 'ya' && pending.step === 1) {
+            pending.step = 2
+            lenwyreply(`Setuju hapus produk ID ${pending.ids.join(', ')}? Reply 'hapus' untuk konfirmasi akhir.`)
+            return
+        } else if (cleanBody === 'hapus' && pending.step === 2) {
+            const productsPath = path.join(process.cwd(), 'WhatsApp', 'database', 'stock', 'products.json')
+            let products = JSON.parse(fs.readFileSync(productsPath, 'utf8') || '[]')
+            products = products.filter(p => !pending.ids.includes(p.id))
+            fs.writeFileSync(productsPath, JSON.stringify(products, null, 2))
+            pendingDeletes.delete(sender)
+            lenwyreply(`✅ Produk ID ${pending.ids.join(', ')} berhasil dihapus.`)
+            return
+        } else if (cleanBody === 'batal') {
+            pendingDeletes.delete(sender)
+            lenwyreply("❌ Penghapusan dibatalkan.")
+            return
+        }
+    }
+
 // Multi Prefix + Tanpa Prefix
 let usedPrefix = null
     for (const pre of globalThis.prefix) {
@@ -104,9 +138,6 @@ let usedPrefix = null
 
     const command = args.shift().toLowerCase()
     const q = args.join(" ")
-
-    // Custom Reply
-    const lenwyreply = (teks) => lenwy.sendMessage(replyJid, { text: teks }, { quoted: len })
 
     // Gambar Menu
     const MenuImage = fs.readFileSync(globalThis.MenuImage)
@@ -379,6 +410,40 @@ case "update": {
         replyMsg += `\n\n⚠️ *Error:*\n${errors.join('\n')}`
     }
     lenwyreply(replyMsg)
+}
+break
+
+case "delete": {
+    if (!isLenwy) return lenwyreply("⚠️ *Hanya Owner yang bisa hapus produk!*")
+
+    const ids = q.split(',').map(id => id.trim()).filter(id => id)
+    if (!ids.length) return lenwyreply("☘️ *Contoh:* .delete 01, 03")
+
+    const productsPath = path.join(process.cwd(), 'WhatsApp', 'database', 'stock', 'products.json')
+    const products = JSON.parse(fs.readFileSync(productsPath, 'utf8') || '[]')
+
+    const validIds = ids.filter(id => products.some(p => p.id === id))
+    if (validIds.length !== ids.length) {
+        const invalidIds = ids.filter(id => !products.some(p => p.id === id))
+        return lenwyreply(`⚠️ *ID berikut tidak ditemukan:* ${invalidIds.join(', ')}`)
+    }
+
+    // Simpan pending delete
+    pendingDeletes.set(sender, { ids: validIds, step: 1, timestamp: Date.now() })
+
+    const deleteProducts = products.filter(p => validIds.includes(p.id))
+    let confirmText = `⚠️ *Konfirmasi Penghapusan Produk*\n\n`
+    for (const p of deleteProducts) {
+        confirmText += `📦 *ID:* ${p.id}\n`
+        confirmText += `📝 *Nama:* ${p.name}\n`
+        confirmText += `💰 *Harga:* Rp ${p.price.toLocaleString()}\n`
+        confirmText += `📄 *Deskripsi:* ${p.desc || '-'}\n`
+        confirmText += `📁 *File:* ${p.file}\n`
+        confirmText += `🏷️ *Type:* ${p.type}\n\n`
+    }
+    confirmText += `Apakah yakin hapus produk di atas? Reply 'ya' untuk lanjut.`
+
+    lenwyreply(confirmText)
 }
 break
 
