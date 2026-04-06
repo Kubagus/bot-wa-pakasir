@@ -302,6 +302,86 @@ case "cari": {
 }
 break
 
+case "update": {
+    if (!isLenwy && !isAdmin) return lenwyreply("⚠️ *Hanya Admin atau Owner yang bisa update produk!*")
+
+    if (!q) return lenwyreply("☘️ *Contoh:* .update 01 price:1500; 02 name:Produk C, price:1000")
+
+    const productsPath = path.join(process.cwd(), 'WhatsApp', 'database', 'stock', 'products.json')
+    let products = JSON.parse(fs.readFileSync(productsPath, 'utf8') || '[]')
+
+    // Split by semicolon untuk produk-produk
+    const productUpdates = q.split(';').map(p => p.trim()).filter(p => p)
+
+    let updatedCount = 0
+    let errors = []
+
+    for (const updateStr of productUpdates) {
+        // Split by space untuk id dan params
+        const parts = updateStr.split(' ')
+        if (parts.length < 2) {
+            errors.push(`Format salah: ${updateStr}`)
+            continue
+        }
+        const id = parts[0]
+        const paramsStr = parts.slice(1).join(' ')
+
+        // Cari produk
+        const productIndex = products.findIndex(p => p.id === id)
+        if (productIndex === -1) {
+            errors.push(`Produk ID ${id} tidak ditemukan`)
+            continue
+        }
+
+        // Parse params
+        const params = paramsStr.split(',').map(p => p.trim())
+        let updates = {}
+
+        for (const param of params) {
+            const [key, ...valueParts] = param.split(':')
+            const value = valueParts.join(':').trim()
+            switch (key.toLowerCase()) {
+                case 'name':
+                    updates.name = value
+                    break
+                case 'price':
+                    const newPrice = parseInt(value)
+                    if (isNaN(newPrice)) {
+                        errors.push(`Price harus angka untuk ID ${id}`)
+                        continue
+                    }
+                    updates.price = newPrice
+                    break
+                case 'file':
+                    updates.file = value
+                    break
+                case 'desc':
+                    updates.desc = value
+                    break
+                case 'type':
+                    updates.type = value
+                    break
+                default:
+                    errors.push(`Parameter ${key} tidak valid untuk ID ${id}`)
+            }
+        }
+
+        // Update produk
+        Object.assign(products[productIndex], updates)
+        updatedCount++
+    }
+
+    // Tulis kembali file
+    fs.writeFileSync(productsPath, JSON.stringify(products, null, 2))
+
+    let replyMsg = `✅ *Update berhasil!*\n\nJumlah produk diupdate: ${updatedCount}`
+    if (errors.length > 0) {
+        replyMsg += `\n\n⚠️ *Error:*\n${errors.join('\n')}`
+    }
+    lenwyreply(replyMsg)
+}
+break
+
 case 'order': {
   const id = q.trim();
   if (!id) return lenwyreply('Contoh : order 01\n_Gunakan "list" Untuk Melihat ID Produk._');
