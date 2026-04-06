@@ -274,6 +274,34 @@ case "addproduk": {
 }
 break
 
+case "cari": {
+    if (!q) return lenwyreply("☘️ *Contoh:* .cari Produk B")
+
+    const keyword = q.toLowerCase()
+    const productsPath = path.join(process.cwd(), 'WhatsApp', 'database', 'stock', 'products.json')
+    const products = JSON.parse(fs.readFileSync(productsPath, 'utf8') || '[]')
+
+    // Filter produk yang match (case insensitive, partial)
+    const results = products.filter(p => p.name.toLowerCase().includes(keyword))
+
+    if (results.length === 0) {
+        return lenwyreply("❌ *Produk tidak ditemukan!*")
+    }
+
+    let msgText = `🔍 *Hasil Pencarian untuk "${q}"*\n\n`
+    for (const p of results) {
+        msgText += `📦 *ID:* ${p.id}\n`
+        msgText += `📝 *Nama:* ${p.name}\n`
+        msgText += `💰 *Harga:* Rp ${p.price.toLocaleString()}\n`
+        msgText += `📄 *Deskripsi:* ${p.desc || '-'}\n`
+        msgText += `📁 *File:* ${p.file}\n`
+        msgText += `🏷️ *Type:* ${p.type}\n\n`
+    }
+
+    lenwyreply(msgText.trim())
+}
+break
+
 case 'order': {
   const id = q.trim();
   if (!id) return lenwyreply('Contoh : order 01\n_Gunakan "list" Untuk Melihat ID Produk._');
