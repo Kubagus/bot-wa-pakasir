@@ -15,7 +15,7 @@ coverage/
 *.sublime-project
 *.sublime-workspace
 
-creator.json
+Whatsapp/database/creator.json
 LenwySesi
 node_modules
 yarn.lockTelegram/database/users.json
